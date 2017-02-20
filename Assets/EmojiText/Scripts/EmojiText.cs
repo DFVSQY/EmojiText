@@ -104,7 +104,7 @@ public class EmojiText : Text
             {
                 int index = emojis[i].posIndex;
                 Image image = null;
-                if(i >= transform.childCount)                                  // 可复用的emoji不够时
+                if(i >= transform.childCount)                                  // if emoji gameobject is not enough
                 {
                     GameObject go = new GameObject("emoji");
                     image = go.AddComponent<Image>();
@@ -140,7 +140,7 @@ public class EmojiText : Text
         while(i < length)
         {
             char c = content[i];
-            int end = i + 3;                            //[微笑] 共占据4个字符
+            int end = i + 3;                            //[微笑]...  It's four bytes
             if(end >= length || !c.Equals('['))
             {
                 sb.Append(c);

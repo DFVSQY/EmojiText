@@ -40,7 +40,6 @@ public struct EmojiSprites
 [CreateAssetMenu(fileName = "EmojiData",menuName = "CreateEmojiData",order = 1)]
 public class EmojiData : ScriptableObject
 {
-    //public Dictionary<string,Sprite> datas = new Dictionary<string,Sprite>();
     public List<EmojiSprites> datas = new List<EmojiSprites>();
 }
 
