@@ -1,5 +1,5 @@
 # EmojiText
-This is a EmojiText solution for unity game engine.<br>
+This is a EmojiText solution for Unity3D UI.<br>
 If you can benefit from this,please give me a start.<br>
 Thank you!
 <br>
