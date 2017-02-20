@@ -1,0 +1,167 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class EmojiText : Text
+{
+    private struct EmojiStruct
+    {
+        public int posIndex;
+        public string des;
+
+        public EmojiStruct(int posIndex,string des)
+        {
+            this.posIndex = posIndex;
+            this.des = des;
+        }
+    }
+
+    private static char emSpace = '\u2001';
+    private VertexHelper vh;
+    private List<EmojiStruct> emojis = new List<EmojiStruct>();
+
+    private static EmojiData _asset;
+    private static EmojiData asset
+    {
+        get
+        {
+            if(_asset == null)
+            {
+                _asset = Resources.Load<EmojiData>("EmojiData/EmojiData");
+                if(_asset == null)
+                {
+                    Debug.LogError("_asset is null");
+                }
+            }
+            return _asset;
+        }
+    }
+
+    private static Dictionary<string,Sprite> _data;
+    private static Dictionary<string,Sprite> data
+    {
+        get
+        {
+            if(_data == null)
+            {
+                _data = new Dictionary<string,Sprite>();
+                List<EmojiSprites> es = asset.datas;
+                foreach(var e in es)
+                {
+                    if(!_data.ContainsKey(e.key))
+                    {
+                        _data.Add(e.key,e.sprite);
+                    }
+                    else
+                    {
+                        Debug.LogError("emoji repeat,key:" + e.key);
+                    }
+                }
+            }
+            return _data;
+        }
+    }
+
+    public override string text
+    {
+        get
+        {
+            return base.text;
+        }
+
+        set
+        {
+            if(!string.IsNullOrEmpty(value))
+            {
+                value = ParserText(value);
+            }
+            base.text = value;
+            StartCoroutine(ShowEmoji());
+        }
+    }
+
+    protected override void OnPopulateMesh(VertexHelper toFill)
+    {
+        vh = toFill;
+        base.OnPopulateMesh(toFill);
+    }
+
+    private IEnumerator ShowEmoji()
+    {
+        yield return new WaitUntil(() =>
+        {
+            return cachedTextGenerator.vertexCount > 0;
+        });
+
+        int count = emojis.Count;
+        if(count > 0)
+        {
+            List<UIVertex> verts = new List<UIVertex>();
+            vh.GetUIVertexStream(verts);
+            for(int i = 0; i < count; i++)
+            {
+                int index = emojis[i].posIndex;
+                Image image = null;
+                if(i >= transform.childCount)                                  // 可复用的emoji不够时
+                {
+                    GameObject go = new GameObject("emoji");
+                    image = go.AddComponent<Image>();
+                    go.transform.SetParent(transform);
+                    go.transform.localScale = Vector3.one;
+                }
+                else
+                {
+                    image = transform.GetChild(i).GetComponent<Image>();
+                }
+                RectTransform rt = image.rectTransform;
+                rt.gameObject.SetActive(true);
+                rt.sizeDelta = new Vector2(fontSize,fontSize);
+                float x = verts[index * 6].position.x + fontSize / 2;
+                float y = verts[index * 6].position.y + fontSize / 4;
+                rt.localPosition = new Vector3(x,y,0f);
+                image.sprite = data[emojis[i].des];
+            }
+            for(int i = count; i < transform.childCount; i++)
+            {
+                Transform ch = transform.GetChild(i);
+                ch.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private string ParserText(string content)
+    {
+        emojis.Clear();
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        int length = content.Length;
+        while(i < length)
+        {
+            char c = content[i];
+            int end = i + 3;                            //[微笑] 共占据4个字符
+            if(end >= length || !c.Equals('['))
+            {
+                sb.Append(c);
+                i++;
+            }
+            else
+            {
+                string s = content.Substring(i,4);
+                if(data.ContainsKey(s))
+                {
+                    sb.Append(emSpace);
+                    emojis.Add(new EmojiStruct(sb.Length - 1,s));
+                    i += 4;
+                }
+                else
+                {
+                    sb.Append(c);
+                    i++;
+                }
+            }
+        }
+        return sb.ToString();
+    }
+}
