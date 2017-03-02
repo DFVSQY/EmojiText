@@ -140,7 +140,7 @@ public class EmojiText : Text
         while(i < length)
         {
             char c = content[i];
-            int end = i + 3;                            //[微笑]...  It's four bytes
+            int end = i + 3;                            //[微笑]...  
             if(end >= length || !c.Equals('['))
             {
                 sb.Append(c);
