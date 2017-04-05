@@ -11,7 +11,7 @@ public class EmojiText : Text
         public int posIndex;
         public string des;
 
-        public EmojiStruct(int posIndex,string des)
+        public EmojiStruct(int posIndex, string des)
         {
             this.posIndex = posIndex;
             this.des = des;
@@ -19,7 +19,7 @@ public class EmojiText : Text
     }
 
     private static char emSpace = '\u2001';
-    private VertexHelper vh;
+    private List<UIVertex> verts = new List<UIVertex>();
     private List<EmojiStruct> emojis = new List<EmojiStruct>();
 
     private static EmojiData _asset;
@@ -27,10 +27,10 @@ public class EmojiText : Text
     {
         get
         {
-            if(_asset == null)
+            if (_asset == null)
             {
                 _asset = Resources.Load<EmojiData>("EmojiData/EmojiData");
-                if(_asset == null)
+                if (_asset == null)
                 {
                     Debug.LogError("_asset is null");
                 }
@@ -39,20 +39,20 @@ public class EmojiText : Text
         }
     }
 
-    private static Dictionary<string,Sprite> _data;
-    private static Dictionary<string,Sprite> data
+    private static Dictionary<string, Sprite> _data;
+    private static Dictionary<string, Sprite> data
     {
         get
         {
-            if(_data == null)
+            if (_data == null)
             {
-                _data = new Dictionary<string,Sprite>();
+                _data = new Dictionary<string, Sprite>();
                 List<EmojiSprites> es = asset.datas;
-                foreach(var e in es)
+                foreach (var e in es)
                 {
-                    if(!_data.ContainsKey(e.key))
+                    if (!_data.ContainsKey(e.key))
                     {
-                        _data.Add(e.key,e.sprite);
+                        _data.Add(e.key, e.sprite);
                     }
                     else
                     {
@@ -73,7 +73,7 @@ public class EmojiText : Text
 
         set
         {
-            if(!string.IsNullOrEmpty(value))
+            if (!string.IsNullOrEmpty(value))
             {
                 value = ParserText(value);
             }
@@ -84,8 +84,8 @@ public class EmojiText : Text
 
     protected override void OnPopulateMesh(VertexHelper toFill)
     {
-        vh = toFill;
         base.OnPopulateMesh(toFill);
+        if (emojis.Count > 0) toFill.GetUIVertexStream(verts);
     }
 
     private IEnumerator ShowEmoji()
@@ -96,15 +96,13 @@ public class EmojiText : Text
         });
 
         int count = emojis.Count;
-        if(count > 0)
+        if (count > 0)
         {
-            List<UIVertex> verts = new List<UIVertex>();
-            vh.GetUIVertexStream(verts);
-            for(int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 int index = emojis[i].posIndex;
                 Image image = null;
-                if(i >= transform.childCount)                                  // if emoji gameobject is not enough
+                if (i >= transform.childCount)                                  // if emoji gameobject is not enough
                 {
                     GameObject go = new GameObject("emoji");
                     image = go.AddComponent<Image>();
@@ -117,18 +115,19 @@ public class EmojiText : Text
                 }
                 RectTransform rt = image.rectTransform;
                 rt.gameObject.SetActive(true);
-                rt.sizeDelta = new Vector2(fontSize,fontSize);
+                rt.sizeDelta = new Vector2(fontSize, fontSize);
                 float x = verts[index * 6].position.x + fontSize / 2;
                 float y = verts[index * 6].position.y + fontSize / 4;
-                rt.localPosition = new Vector3(x,y,0f);
+                rt.localPosition = new Vector3(x, y, 0f);
                 image.sprite = data[emojis[i].des];
             }
-            for(int i = count; i < transform.childCount; i++)
+            for (int i = count; i < transform.childCount; i++)
             {
                 Transform ch = transform.GetChild(i);
                 ch.gameObject.SetActive(false);
             }
         }
+        verts.Clear();
     }
 
     private string ParserText(string content)
@@ -137,22 +136,22 @@ public class EmojiText : Text
         StringBuilder sb = new StringBuilder();
         int i = 0;
         int length = content.Length;
-        while(i < length)
+        while (i < length)
         {
             char c = content[i];
             int end = i + 3;                            //[微笑]...  
-            if(end >= length || !c.Equals('['))
+            if (end >= length || !c.Equals('['))
             {
                 sb.Append(c);
                 i++;
             }
             else
             {
-                string s = content.Substring(i,4);
-                if(data.ContainsKey(s))
+                string s = content.Substring(i, 4);
+                if (data.ContainsKey(s))
                 {
                     sb.Append(emSpace);
-                    emojis.Add(new EmojiStruct(sb.Length - 1,s));
+                    emojis.Add(new EmojiStruct(sb.Length - 1, s));
                     i += 4;
                 }
                 else

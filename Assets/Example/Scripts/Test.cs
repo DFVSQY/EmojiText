@@ -10,7 +10,7 @@ public class Test : MonoBehaviour
     {
         get
         {
-            if(_text == null)
+            if (_text == null)
             {
                 _text = transform.Find("EmojiText").GetComponent<Text>();
             }
