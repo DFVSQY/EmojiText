@@ -96,7 +96,7 @@ public class EmojiText : Text
         });
 
         int count = emojis.Count;
-        if (count > 0)
+        if (count > 0 && verts.Count > 0)
         {
             for (int i = 0; i < count; i++)
             {
