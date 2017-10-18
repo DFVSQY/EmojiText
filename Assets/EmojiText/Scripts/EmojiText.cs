@@ -127,6 +127,14 @@ public class EmojiText : Text
                 ch.gameObject.SetActive(false);
             }
         }
+        else if (count <= 0)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                Transform ch = transform.GetChild(i);
+                ch.gameObject.SetActive(false);
+            }
+        }
         verts.Clear();
     }
 
