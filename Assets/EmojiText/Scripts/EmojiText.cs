@@ -78,6 +78,11 @@ public class EmojiText : Text
                 value = ParserText(value);
             }
             base.text = value;
+
+            // sometimes when set text, OnPopulateMesh won't be called, 
+            // use this statement to force OnPopulateMesh to be called 
+            SetVerticesDirty();
+
             StartCoroutine(ShowEmoji());
         }
     }
